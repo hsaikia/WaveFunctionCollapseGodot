@@ -4,7 +4,7 @@
 [ext_resource type="Script" uid="uid://cajxffc07b4yv" path="res://scripts/map.gd" id="2_0cso3"]
 [ext_resource type="Script" uid="uid://cjkrey2o2y5hk" path="res://scripts/cam.gd" id="3_2klcf"]
 
-[node name="Map" type="WfcMap"]
+[node name="WfcMapLayer" type="WfcMapLayer"]
 y_sort_enabled = true
 tile_set = ExtResource("1_gldc4")
 script = ExtResource("2_0cso3")

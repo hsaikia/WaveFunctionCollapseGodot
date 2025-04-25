@@ -1,4 +1,4 @@
-const NUM_TILES: usize = 78;
+pub const NUM_TILES: usize = 78;
 
 // South-West, South-East, North-East, North-West
 pub const DIRECTIONS: [(i32, i32); 4] = [(0, 1), (1, 0), (0, -1), (-1, 0)];

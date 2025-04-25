@@ -1,4 +1,4 @@
-extends WfcMap
+extends WfcMapLayer
 
 #@export var map_size : Vector2i = Vector2i(10, 10)
 

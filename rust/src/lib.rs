@@ -6,5 +6,5 @@ struct MyExtension;
 unsafe impl ExtensionLibrary for MyExtension {}
 
 mod wfc_map;
-mod wfc_relation;
+mod wfc_probability_map;
 mod wfc_tile_dictionary;

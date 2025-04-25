@@ -1,28 +1,21 @@
-use crate::wfc_tile_dictionary::*;
+use crate::wfc_tile_dictionary::{DIRECTIONS, NUM_TILES, WFC_TILE_DICT};
 use godot::{classes::RandomNumberGenerator, global::godot_print, obj::Gd};
 
-pub struct WfcRelation {
+#[derive(Default)]
+pub struct WfcProbabilityMap {
     pub possible_neighbors: Vec<[Vec<usize>; 4]>,
 }
 
-impl WfcRelation {
-    pub fn new(num_tiles: usize) -> Self {
-        if num_tiles == 0 {
-            return Self {
-                possible_neighbors: Vec::new(),
-            };
-        }
-
-        let mut possible_neighbors: Vec<[Vec<usize>; 4]> = Vec::with_capacity(num_tiles);
-        for _ in 0..num_tiles {
+impl WfcProbabilityMap {
+    pub fn new() -> Self {
+        let mut possible_neighbors: Vec<[Vec<usize>; 4]> = Vec::with_capacity(NUM_TILES);
+        for _ in 0..NUM_TILES {
             let tile_neighbors: [Vec<usize>; 4] = Default::default();
             possible_neighbors.push(tile_neighbors);
         }
 
-        assert!(num_tiles == WFC_TILE_DICT.len());
-
-        for i in 0..num_tiles {
-            for j in i..num_tiles {
+        for i in 0..NUM_TILES {
+            for j in i..NUM_TILES {
                 for d in 0..4 {
                     // Check if opposite side (d and (d + 2) % 4) of a cardinal direction has the same connection type
                     if WFC_TILE_DICT[i][d] == WFC_TILE_DICT[j][(d + 2) % 4] {
@@ -38,6 +31,7 @@ impl WfcRelation {
         Self { possible_neighbors }
     }
 
+    /// Pick (one of) the grid locations which has the minimum possible valid tile options
     fn pick_possibility(
         rng: &mut Gd<RandomNumberGenerator>,
         grid: &[Vec<Option<usize>>],
@@ -72,6 +66,7 @@ impl WfcRelation {
         None
     }
 
+    /// Sets the grid position at (x, y) to a random tile and propagates the dependencies from that choice to neighboring tiles
     fn set_and_propagate(
         &self,
         rng: &mut Gd<RandomNumberGenerator>,
@@ -123,7 +118,7 @@ impl WfcRelation {
     }
 
     fn all_done(done: &[Vec<Option<usize>>]) -> bool {
-        done.iter().all(|x| x.iter().all(|el| el.is_some()))
+        done.iter().all(|x| x.iter().all(std::option::Option::is_some))
     }
 
     pub fn generate_wfc_grid(
