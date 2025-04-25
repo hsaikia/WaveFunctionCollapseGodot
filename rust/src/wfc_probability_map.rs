@@ -97,7 +97,7 @@ impl WfcProbabilityMap {
                 let nx = nx as usize;
                 let ny = ny as usize;
 
-                if possibility_grid[nx][ny].is_empty() {
+                if possibility_grid[nx][ny].len() < 2 {
                     continue;
                 }
 
@@ -126,9 +126,13 @@ impl WfcProbabilityMap {
         rng: &mut Gd<RandomNumberGenerator>,
         width: usize,
         height: usize,
-    ) -> Vec<Vec<Option<usize>>> {
-        let num_tiles = self.possible_neighbors.len();
-        let all_neighbors = (0..num_tiles).collect::<Vec<_>>();
+        retries: i32,
+    ) -> Option<Vec<Vec<Option<usize>>>> {
+        if retries == 0 {
+            // Failed to generate for all retry attempts
+            return None;
+        }
+        let all_neighbors = (0..NUM_TILES).collect::<Vec<_>>();
         let mut possibilities_grid = vec![vec![all_neighbors.clone(); height]; width];
         let mut grid = vec![vec![None; height]; width];
 
@@ -142,10 +146,10 @@ impl WfcProbabilityMap {
 
         if !Self::all_done(&grid) {
             godot_print!("Failed to generate WFC grid");
-            return self.generate_wfc_grid(rng, width, height);
+            return self.generate_wfc_grid(rng, width, height, retries - 1);
         }
 
         godot_print!("Generated WFC grid");
-        grid
+        Some(grid)
     }
 }

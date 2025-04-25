@@ -19,6 +19,8 @@ struct WfcMapLayer {
     atlas_source_id: i32,
     #[export]
     default_tile: Vector2i,
+    #[export]
+    retry_attempts: i32,
 }
 
 #[godot_api]
@@ -39,19 +41,20 @@ impl WfcMapLayer {
             return;
         }
 
-        let grid = self.wfc_prob_map.generate_wfc_grid(
+        if let Some(grid) = self.wfc_prob_map.generate_wfc_grid(
             &mut self.rng,
             self.map_size.x as usize,
             self.map_size.y as usize,
-        );
-
-        self.base_mut().clear();
-        for x in 0..self.map_size.x {
-            for y in 0..self.map_size.y {
-                if let Some(tile) = grid[x as usize][y as usize] {
-                    self.set_cell(x, y, Vector2i::new(tile as i32, 0));
-                } else {
-                    self.set_cell(x, y, self.default_tile);
+            self.retry_attempts,
+        ) {
+            self.base_mut().clear();
+            for x in 0..self.map_size.x {
+                for y in 0..self.map_size.y {
+                    if let Some(tile) = grid[x as usize][y as usize] {
+                        self.set_cell(x, y, Vector2i::new(tile as i32, 0));
+                    } else {
+                        self.set_cell(x, y, self.default_tile);
+                    }
                 }
             }
         }
@@ -69,6 +72,7 @@ impl ITileMapLayer for WfcMapLayer {
             map_size: Vector2i { x: 10, y: 10 },
             atlas_source_id: 0,
             default_tile: Vector2i { x: 26, y: 0 },
+            retry_attempts: 3,
         }
     }
 
