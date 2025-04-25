@@ -1,15 +1,15 @@
 use crate::wfc_relation::WfcRelation;
 use crate::wfc_tile_dictionary::DEFAULT_TILE;
-use godot::engine::ITileMap;
-use godot::engine::RandomNumberGenerator;
-use godot::engine::TileMap;
-use godot::engine::TileSetAtlasSource;
+use godot::classes::ITileMapLayer;
+use godot::classes::RandomNumberGenerator;
+use godot::classes::TileMapLayer;
+use godot::classes::TileSetAtlasSource;
 use godot::prelude::*;
 
 #[derive(GodotClass)]
-#[class(base=TileMap)]
+#[class(base=TileMapLayer)]
 struct WfcMap {
-    base: Base<TileMap>,
+    base: Base<TileMapLayer>,
     rng: Gd<RandomNumberGenerator>,
     grid_size: Vector2i,
     tile_count: i32,
@@ -23,7 +23,7 @@ impl WfcMap {
     #[func]
     fn set_cell(&mut self, x: i32, y: i32, source_id: i32, atlas_coords: Vector2i) {
         self.base_mut()
-            .set_cell_ex(0, Vector2i { x, y })
+            .set_cell_ex(Vector2i { x, y })
             .source_id(source_id)
             .atlas_coords(atlas_coords)
             .done();
@@ -39,7 +39,7 @@ impl WfcMap {
             self.wfc_rel
                 .generate_wfc_grid(&mut self.rng, map_size.x as usize, map_size.y as usize);
 
-        self.base_mut().clear_layer(0);
+        self.base_mut().clear();
         for x in 0..map_size.x {
             for y in 0..map_size.y {
                 if let Some(tile) = grid[x as usize][y as usize] {
@@ -53,8 +53,8 @@ impl WfcMap {
 }
 
 #[godot_api]
-impl ITileMap for WfcMap {
-    fn init(base: Base<TileMap>) -> Self {
+impl ITileMapLayer for WfcMap {
+    fn init(base: Base<TileMapLayer>) -> Self {
         Self {
             base,
             rng: RandomNumberGenerator::new_gd(),
@@ -67,7 +67,7 @@ impl ITileMap for WfcMap {
     fn ready(&mut self) {
         if let Ok(tile_set_atlas_src) = self
             .base()
-            .get_tileset()
+            .get_tile_set()
             .unwrap()
             .get_source(ATLAS_SOURCE_ID)
             .unwrap()

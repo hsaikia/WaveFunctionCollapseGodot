@@ -1,5 +1,5 @@
 use crate::wfc_tile_dictionary::*;
-use godot::{engine::RandomNumberGenerator, log::godot_print, obj::Gd};
+use godot::{classes::RandomNumberGenerator, global::godot_print, obj::Gd};
 
 pub const DIRECTIONS: [(i32, i32); 4] = [(0, 1), (1, 0), (0, -1), (-1, 0)];
 

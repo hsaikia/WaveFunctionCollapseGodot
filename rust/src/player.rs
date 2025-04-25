@@ -1,5 +1,5 @@
-use godot::engine::ISprite2D;
-use godot::engine::Sprite2D;
+use godot::classes::ISprite2D;
+use godot::classes::Sprite2D;
 use godot::prelude::*;
 
 #[derive(GodotClass)]

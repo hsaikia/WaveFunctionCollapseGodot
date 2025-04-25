@@ -8,8 +8,8 @@ func _ready():
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _input(event):
 	if event.is_action("zoom_in"):
-		zoom.x -= 0.1;
-		zoom.y -= 0.1;
-	elif event.is_action("zoom_out"):
 		zoom.x += 0.1;
 		zoom.y += 0.1;
+	elif event.is_action("zoom_out"):
+		zoom.x -= 0.1;
+		zoom.y -= 0.1;

@@ -1,5 +1,5 @@
 [package]
-name = "rust_project" # Appears in the filename of the compiled dynamic library.
+name = "rust" # Appears in the filename of the compiled dynamic library.
 version = "0.1.0"     # You can leave version and edition as-is for now.
 edition = "2021"
 
