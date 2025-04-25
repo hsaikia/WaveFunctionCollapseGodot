@@ -1,0 +1,15 @@
+[gd_scene load_steps=4 format=3 uid="uid://cxyoi1uqbytc2"]
+
+[ext_resource type="TileSet" uid="uid://dg0t54fdjn1la" path="res://resources/2d_iso.tres" id="1_gldc4"]
+[ext_resource type="Script" uid="uid://cajxffc07b4yv" path="res://scripts/map.gd" id="2_0cso3"]
+[ext_resource type="Script" uid="uid://cjkrey2o2y5hk" path="res://scripts/cam.gd" id="3_2klcf"]
+
+[node name="Map" type="WfcMap"]
+y_sort_enabled = true
+tile_set = ExtResource("1_gldc4")
+script = ExtResource("2_0cso3")
+
+[node name="Cam" type="Camera2D" parent="."]
+position = Vector2(100, 324)
+zoom = Vector2(1.5, 1.5)
+script = ExtResource("3_2klcf")

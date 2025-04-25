@@ -11,9 +11,8 @@ config_version=5
 [application]
 
 config/name="WFC"
-run/main_scene="res://map.tscn"
+run/main_scene="res://scenes/map.tscn"
 config/features=PackedStringArray("4.4", "Mobile")
-config/icon="res://icon.svg"
 
 [display]
 

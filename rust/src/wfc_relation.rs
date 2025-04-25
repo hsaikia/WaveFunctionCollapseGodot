@@ -1,8 +1,6 @@
 use crate::wfc_tile_dictionary::*;
 use godot::{classes::RandomNumberGenerator, global::godot_print, obj::Gd};
 
-pub const DIRECTIONS: [(i32, i32); 4] = [(0, 1), (1, 0), (0, -1), (-1, 0)];
-
 pub struct WfcRelation {
     pub possible_neighbors: Vec<[Vec<usize>; 4]>,
 }
@@ -26,6 +24,7 @@ impl WfcRelation {
         for i in 0..num_tiles {
             for j in i..num_tiles {
                 for d in 0..4 {
+                    // Check if opposite side (d and (d + 2) % 4) of a cardinal direction has the same connection type
                     if WFC_TILE_DICT[i][d] == WFC_TILE_DICT[j][(d + 2) % 4] {
                         possible_neighbors[i][d].push(j);
                         if i != j {
@@ -56,9 +55,7 @@ impl WfcRelation {
                 }
 
                 let num_possibility = possibility_grid[x][y].len();
-                if num_possibility < min_num_possibility {
-                    min_num_possibility = num_possibility;
-                }
+                min_num_possibility = min_num_possibility.min(num_possibility);
             }
         }
 
@@ -126,14 +123,7 @@ impl WfcRelation {
     }
 
     fn all_done(done: &[Vec<Option<usize>>]) -> bool {
-        for row in done {
-            for el in row {
-                if el.is_none() {
-                    return false;
-                }
-            }
-        }
-        true
+        done.iter().all(|x| x.iter().all(|el| el.is_some()))
     }
 
     pub fn generate_wfc_grid(
@@ -147,15 +137,15 @@ impl WfcRelation {
         let mut possibilities_grid = vec![vec![all_neighbors.clone(); height]; width];
         let mut grid = vec![vec![None; height]; width];
 
-        while !WfcRelation::all_done(&grid) {
-            if let Some((x, y)) = WfcRelation::pick_possibility(rng, &grid, &possibilities_grid) {
+        while !Self::all_done(&grid) {
+            if let Some((x, y)) = Self::pick_possibility(rng, &grid, &possibilities_grid) {
                 self.set_and_propagate(rng, &mut grid, &mut possibilities_grid, x, y);
             } else {
                 break;
             }
         }
 
-        if !WfcRelation::all_done(&grid) {
+        if !Self::all_done(&grid) {
             godot_print!("Failed to generate WFC grid");
             return self.generate_wfc_grid(rng, width, height);
         }

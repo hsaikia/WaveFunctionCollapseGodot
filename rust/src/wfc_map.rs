@@ -1,5 +1,4 @@
 use crate::wfc_relation::WfcRelation;
-use crate::wfc_tile_dictionary::DEFAULT_TILE;
 use godot::classes::ITileMapLayer;
 use godot::classes::RandomNumberGenerator;
 use godot::classes::TileMapLayer;
@@ -11,12 +10,15 @@ use godot::prelude::*;
 struct WfcMap {
     base: Base<TileMapLayer>,
     rng: Gd<RandomNumberGenerator>,
-    grid_size: Vector2i,
     tile_count: i32,
     wfc_rel: WfcRelation,
+    #[export]
+    map_size: Vector2i,
+    #[export]
+    atlas_source_id: i32,
+    #[export]
+    default_tile: Vector2i,
 }
-
-const ATLAS_SOURCE_ID: i32 = 0;
 
 #[godot_api]
 impl WfcMap {
@@ -30,22 +32,24 @@ impl WfcMap {
     }
 
     #[func]
-    fn generate_new(&mut self, map_size: Vector2i) {
+    fn generate_new(&mut self) {
         if self.tile_count == 0 {
             return;
         }
 
-        let grid =
-            self.wfc_rel
-                .generate_wfc_grid(&mut self.rng, map_size.x as usize, map_size.y as usize);
+        let grid = self.wfc_rel.generate_wfc_grid(
+            &mut self.rng,
+            self.map_size.x as usize,
+            self.map_size.y as usize,
+        );
 
         self.base_mut().clear();
-        for x in 0..map_size.x {
-            for y in 0..map_size.y {
+        for x in 0..self.map_size.x {
+            for y in 0..self.map_size.y {
                 if let Some(tile) = grid[x as usize][y as usize] {
-                    self.set_cell(x, y, ATLAS_SOURCE_ID, Vector2i::new(tile as i32, 0));
+                    self.set_cell(x, y, self.atlas_source_id, Vector2i::new(tile as i32, 0));
                 } else {
-                    self.set_cell(x, y, ATLAS_SOURCE_ID, Vector2i::new(DEFAULT_TILE, 0));
+                    self.set_cell(x, y, self.atlas_source_id, self.default_tile);
                 }
             }
         }
@@ -58,9 +62,11 @@ impl ITileMapLayer for WfcMap {
         Self {
             base,
             rng: RandomNumberGenerator::new_gd(),
-            grid_size: Vector2i::new(0, 0),
             tile_count: 0,
             wfc_rel: WfcRelation::new(0),
+            map_size: Vector2i { x: 10, y: 10 },
+            atlas_source_id: 0,
+            default_tile: Vector2i { x: 26, y: 0 },
         }
     }
 
@@ -69,15 +75,14 @@ impl ITileMapLayer for WfcMap {
             .base()
             .get_tile_set()
             .unwrap()
-            .get_source(ATLAS_SOURCE_ID)
+            .get_source(self.atlas_source_id)
             .unwrap()
             .try_cast::<TileSetAtlasSource>()
         {
-            self.grid_size = tile_set_atlas_src.get_atlas_grid_size();
             self.tile_count = tile_set_atlas_src.get_tiles_count();
             godot_print!("Tile count: {}", self.tile_count);
             self.wfc_rel = WfcRelation::new(self.tile_count as usize);
         }
-        self.generate_new(Vector2i { x: 10, y: 10 });
+        self.generate_new();
     }
 }
