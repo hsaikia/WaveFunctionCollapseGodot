@@ -1,10 +1,12 @@
 use crate::wfc_tile_dictionary::{DIRECTIONS, NUM_TILES, WFC_TILE_DICT};
 use godot::{classes::RandomNumberGenerator, global::godot_print, obj::Gd};
 
+type TileIdx = usize;
+
 #[derive(Clone)]
 pub enum State {
-    Wave(Vec<usize>),
-    Collapsed(usize),
+    Wave(Vec<TileIdx>),
+    Collapsed(TileIdx),
 }
 
 impl State {
@@ -35,15 +37,15 @@ impl State {
 
 #[derive(Default)]
 pub struct WfcProbabilityMap {
-    possible_neighbors: Vec<[Vec<usize>; 4]>,
+    possible_neighbors: Vec<[Vec<TileIdx>; 4]>,
     pub grid: Vec<Vec<State>>,
 }
 
 impl WfcProbabilityMap {
     pub fn new(width: usize, height: usize) -> Self {
-        let mut possible_neighbors: Vec<[Vec<usize>; 4]> = Vec::with_capacity(NUM_TILES);
+        let mut possible_neighbors: Vec<[Vec<TileIdx>; 4]> = Vec::with_capacity(NUM_TILES);
         for _ in 0..NUM_TILES {
-            let tile_neighbors: [Vec<usize>; 4] = Default::default();
+            let tile_neighbors: [Vec<TileIdx>; 4] = Default::default();
             possible_neighbors.push(tile_neighbors);
         }
 
@@ -61,8 +63,8 @@ impl WfcProbabilityMap {
             }
         }
 
-        let all_neighbors = (0..NUM_TILES).collect::<Vec<_>>();
-        let grid = vec![vec![State::Wave(all_neighbors.clone()); height]; width];
+        let all_tile_indices = (0..NUM_TILES).collect::<Vec<_>>();
+        let grid = vec![vec![State::Wave(all_tile_indices.clone()); height]; width];
 
         Self {
             possible_neighbors,
@@ -71,10 +73,10 @@ impl WfcProbabilityMap {
     }
 
     fn reset(&mut self) {
-        let all_neighbors = (0..NUM_TILES).collect::<Vec<_>>();
+        let all_tile_indices = (0..NUM_TILES).collect::<Vec<_>>();
         let width = self.grid.len();
         let height = self.grid.first().unwrap_or(&vec![]).len();
-        self.grid = vec![vec![State::Wave(all_neighbors.clone()); height]; width];
+        self.grid = vec![vec![State::Wave(all_tile_indices.clone()); height]; width];
     }
 
     /// Pick (one of) the grid locations which has the minimum possible valid tile options
@@ -130,16 +132,15 @@ impl WfcProbabilityMap {
                 let nx = nx as usize;
                 let ny = ny as usize;
 
-                let values = self.grid[curr_x][curr_y].values();
+                let possible_values_nx_ny: Vec<usize> = self.grid[curr_x][curr_y]
+                    .values()
+                    .iter()
+                    .flat_map(|val| self.possible_neighbors[*val][dir_idx].clone())
+                    .collect();
                 match &mut self.grid[nx][ny] {
                     State::Wave(possibilities) => {
                         let old_num_possibilities = possibilities.len();
-                        let mut all_possible_values: Vec<usize> = Vec::new();
-                        for val in values {
-                            all_possible_values.extend(&self.possible_neighbors[val][dir_idx]);
-                        }
-
-                        possibilities.retain(|v| all_possible_values.contains(v));
+                        possibilities.retain(|v| possible_values_nx_ny.contains(v));
 
                         if old_num_possibilities > possibilities.len() {
                             q.push((nx, ny));
