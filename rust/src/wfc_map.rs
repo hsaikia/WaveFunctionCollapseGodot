@@ -1,3 +1,4 @@
+use crate::wfc_probability_map::State;
 use crate::wfc_probability_map::WfcProbabilityMap;
 use crate::wfc_tile_dictionary::NUM_TILES;
 use godot::classes::ITileMapLayer;
@@ -41,7 +42,7 @@ impl WfcMapLayer {
             return;
         }
 
-        if let Some(grid) = self.wfc_prob_map.generate_wfc_grid(
+        if self.wfc_prob_map.generate_wfc_grid(
             &mut self.rng,
             self.map_size.x as usize,
             self.map_size.y as usize,
@@ -50,10 +51,13 @@ impl WfcMapLayer {
             self.base_mut().clear();
             for x in 0..self.map_size.x {
                 for y in 0..self.map_size.y {
-                    if let Some(tile) = grid[x as usize][y as usize] {
-                        self.set_cell(x, y, Vector2i::new(tile as i32, 0));
-                    } else {
-                        self.set_cell(x, y, self.default_tile);
+                    match self.wfc_prob_map.grid[x as usize][y as usize] {
+                        State::Collapsed(tile) => {
+                            self.set_cell(x, y, Vector2i::new(tile as i32, 0));
+                        }
+                        State::Wave(_) => {
+                            self.set_cell(x, y, self.default_tile);
+                        }
                     }
                 }
             }
@@ -87,7 +91,8 @@ impl ITileMapLayer for WfcMapLayer {
         {
             if tile_set_atlas_src.get_tiles_count() == NUM_TILES as i32 {
                 self.is_ready = true;
-                self.wfc_prob_map = WfcProbabilityMap::new();
+                self.wfc_prob_map =
+                    WfcProbabilityMap::new(self.map_size.x as usize, self.map_size.y as usize);
                 self.generate_new();
             }
         }
