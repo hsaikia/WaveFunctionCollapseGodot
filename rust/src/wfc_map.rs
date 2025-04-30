@@ -76,7 +76,7 @@ impl ITileMapLayer for WfcMapLayer {
             map_size: Vector2i { x: 10, y: 10 },
             atlas_source_id: 0,
             default_tile: Vector2i { x: 26, y: 0 },
-            retry_attempts: 3,
+            retry_attempts: 6,
         }
     }
 

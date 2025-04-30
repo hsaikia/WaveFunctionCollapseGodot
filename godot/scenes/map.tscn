@@ -5,11 +5,10 @@
 [ext_resource type="Script" uid="uid://cjkrey2o2y5hk" path="res://scripts/cam.gd" id="3_2klcf"]
 
 [node name="WfcMapLayer" type="WfcMapLayer"]
+map_size = Vector2i(20, 20)
 y_sort_enabled = true
 tile_set = ExtResource("1_gldc4")
 script = ExtResource("2_0cso3")
 
 [node name="Cam" type="Camera2D" parent="."]
-position = Vector2(100, 324)
-zoom = Vector2(1.5, 1.5)
 script = ExtResource("3_2klcf")

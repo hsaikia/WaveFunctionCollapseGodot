@@ -52,7 +52,7 @@ impl WfcProbabilityMap {
         for i in 0..NUM_TILES {
             for j in i..NUM_TILES {
                 for d in 0..4 {
-                    // Check if opposite side (d and (d + 2) % 4) of a cardinal direction has the same connection type
+                    // Check if opposite side (d and (d + 2) % 4) of a direction has the same connection type
                     if WFC_TILE_DICT[i][d] == WFC_TILE_DICT[j][(d + 2) % 4] {
                         possible_neighbors[i][d].push(j);
                         if i != j {
@@ -80,6 +80,7 @@ impl WfcProbabilityMap {
     }
 
     /// Pick (one of) the grid locations which has the minimum possible valid tile options
+    /// Most constrained grid location is picked as that likely preserves the most number of options for other cells
     fn pick_possibility(&self, rng: &mut Gd<RandomNumberGenerator>) -> Option<(usize, usize)> {
         let mut min_num_possibility = usize::MAX;
         for x in 0..self.grid.len() {
@@ -154,10 +155,26 @@ impl WfcProbabilityMap {
         }
     }
 
-    fn all_done(&self) -> bool {
+    fn all_collapsed(&self) -> bool {
         self.grid
             .iter()
             .all(|row| row.iter().all(|s| s.is_collapsed()))
+    }
+
+    fn all_same(&self) -> bool {
+        let mut count: [usize; NUM_TILES] = [0; NUM_TILES];
+        for row in &self.grid {
+            for cell in row {
+                match cell {
+                    State::Collapsed(x) => {
+                        count[*x] += 1;
+                    }
+                    _ => (),
+                }
+            }
+        }
+        let grid_cells = self.grid.len() * self.grid.first().unwrap_or(&vec![]).len();
+        count.iter().filter(|x| **x == grid_cells).count() > 0
     }
 
     pub fn generate_wfc_grid(
@@ -173,7 +190,7 @@ impl WfcProbabilityMap {
         }
 
         self.reset();
-        while !self.all_done() {
+        while !self.all_collapsed() {
             if let Some((x, y)) = self.pick_possibility(rng) {
                 self.set_and_propagate(rng, x, y);
             } else {
@@ -181,7 +198,7 @@ impl WfcProbabilityMap {
             }
         }
 
-        if !self.all_done() {
+        if !self.all_collapsed() || self.all_same() {
             godot_print!("Failed to generate WFC grid");
             return self.generate_wfc_grid(rng, width, height, retries - 1);
         }

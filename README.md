@@ -25,4 +25,3 @@ Then open Godot and the project under the godot subfolder and hit run!
 <img width="400" src="./ss2.png"/>
 <img width="400" src="./ss3.png"/>
 <img width="400" src="./ss4.png"/>
-
