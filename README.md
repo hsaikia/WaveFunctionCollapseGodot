@@ -4,7 +4,7 @@ A WFC plugin written in Rust and exposed in Godot using GDExtensions.
 
 ## Implemented classes
 
-A WFC Map class is implemented on top of the TileMap class. 
+A WFC Map class is implemented on top of the TileMapLayer class. 
 
 ## How to run
 
