@@ -18,7 +18,7 @@ Then open Godot and the project under the godot subfolder and hit run!
 
 ## Interactions
 
-- Spacebar would create a random map using WFC on the isometric maps tileset.
+- Spacebar would create a random map using WFC on the isometric maps tileset. Otherwise a new random map is generated periodically.
 - Scrolling will zoom in/out.
 
 <img width="400" src="./ss1.png"/>
